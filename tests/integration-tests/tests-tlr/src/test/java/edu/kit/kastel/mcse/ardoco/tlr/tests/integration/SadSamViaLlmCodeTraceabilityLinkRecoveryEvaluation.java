@@ -22,13 +22,16 @@ import edu.kit.kastel.mcse.ardoco.core.execution.runner.ArDoCoRunner;
 import edu.kit.kastel.mcse.ardoco.core.tests.eval.CodeProject;
 import edu.kit.kastel.mcse.ardoco.core.tests.eval.results.ExpectedResults;
 import edu.kit.kastel.mcse.ardoco.tlr.execution.ArDoCoForSadSamViaLlmCodeTraceabilityLinkRecovery;
+import edu.kit.kastel.mcse.ardoco.tlr.models.informants.LargeLanguageModel;
 
 class SadSamViaLlmCodeTraceabilityLinkRecoveryEvaluation extends TraceabilityLinkRecoveryEvaluation<CodeProject> {
     private final boolean acmFile;
+    private final LargeLanguageModel largeLanguageModel;
 
-    public SadSamViaLlmCodeTraceabilityLinkRecoveryEvaluation(boolean acmFile) {
+    public SadSamViaLlmCodeTraceabilityLinkRecoveryEvaluation(boolean acmFile, LargeLanguageModel largeLanguageModel) {
         super();
         this.acmFile = acmFile;
+        this.largeLanguageModel = largeLanguageModel;
     }
 
     @Override
@@ -46,7 +49,7 @@ class SadSamViaLlmCodeTraceabilityLinkRecoveryEvaluation extends TraceabilityLin
         File outputDir = new File(OUTPUT);
 
         var runner = new ArDoCoForSadSamViaLlmCodeTraceabilityLinkRecovery(name);
-        runner.setUp(textInput, inputCode, additionalConfigsMap, outputDir);
+        runner.setUp(textInput, inputCode, additionalConfigsMap, outputDir, largeLanguageModel);
         return runner;
     }
 

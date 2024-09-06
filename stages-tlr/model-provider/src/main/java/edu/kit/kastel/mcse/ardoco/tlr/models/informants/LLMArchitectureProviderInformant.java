@@ -11,8 +11,6 @@ import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;
-import dev.langchain4j.model.openai.OpenAiChatModel;
-import dev.langchain4j.model.openai.OpenAiChatModelName;
 import edu.kit.kastel.mcse.ardoco.core.api.models.ArchitectureModelType;
 import edu.kit.kastel.mcse.ardoco.core.api.models.ModelStates;
 import edu.kit.kastel.mcse.ardoco.core.api.models.arcotl.ArchitectureModel;
@@ -35,19 +33,14 @@ public class LLMArchitectureProviderInformant extends Informant {
                     """,
             "Now provide a list that only covers the component names. Omit common prefixes and suffixes in the names.");
 
-    public LLMArchitectureProviderInformant(DataRepository dataRepository) {
+    public LLMArchitectureProviderInformant(DataRepository dataRepository, LargeLanguageModel largeLanguageModel) {
         super(LLMArchitectureProviderInformant.class.getSimpleName(), dataRepository);
         String apiKey = System.getenv("OPENAI_API_KEY");
         String orgId = System.getenv("OPENAI_ORG_ID");
         if (apiKey == null || orgId == null) {
             throw new IllegalArgumentException("OPENAI_API_KEY and OPENAI_ORG_ID must be set as environment variables");
         }
-        this.chatLanguageModel = new OpenAiChatModel.OpenAiChatModelBuilder().modelName(OpenAiChatModelName.GPT_4_O)
-                .apiKey(apiKey)
-                .organizationId(orgId)
-                .seed(422413373)
-                .temperature(0.0)
-                .build();
+        this.chatLanguageModel = largeLanguageModel.create();
     }
 
     @Override
@@ -95,12 +88,12 @@ public class LLMArchitectureProviderInformant extends Informant {
                 componentNames.add(line.split("\\.\\s*")[1]);
             }
             // Version 3: - **Name**
-            else if (line.matches("^-\\s*\\*\\*.*\\*\\*$")) {
+            else if (line.matches("^([-*])\\s*\\*\\*.*\\*\\*$")) {
                 componentNames.add(line.split("\\*\\*")[1]);
             }
             // Version 4: - Name
-            else if (line.matches("^-\\s*.*$")) {
-                componentNames.add(line.split("-\\s*")[1]);
+            else if (line.matches("^([-*])\\s*.*$")) {
+                componentNames.add(line.split("([-*])\\s*")[1]);
             } else {
                 logger.warn("Could not parse line: {}", line);
             }

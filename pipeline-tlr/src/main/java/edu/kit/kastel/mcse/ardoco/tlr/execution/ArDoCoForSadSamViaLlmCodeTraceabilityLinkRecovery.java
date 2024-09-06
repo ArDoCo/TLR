@@ -13,6 +13,7 @@ import edu.kit.kastel.mcse.ardoco.tlr.codetraceability.SamCodeTraceabilityLinkRe
 import edu.kit.kastel.mcse.ardoco.tlr.connectiongenerator.ConnectionGenerator;
 import edu.kit.kastel.mcse.ardoco.tlr.models.agents.ArCoTLModelProviderAgent;
 import edu.kit.kastel.mcse.ardoco.tlr.models.agents.LLMArchitectureProviderAgent;
+import edu.kit.kastel.mcse.ardoco.tlr.models.informants.LargeLanguageModel;
 import edu.kit.kastel.mcse.ardoco.tlr.recommendationgenerator.RecommendationGenerator;
 import edu.kit.kastel.mcse.ardoco.tlr.text.providers.TextPreprocessingAgent;
 import edu.kit.kastel.mcse.ardoco.tlr.textextraction.TextExtraction;
@@ -23,13 +24,13 @@ public class ArDoCoForSadSamViaLlmCodeTraceabilityLinkRecovery extends ArDoCoRun
         super(projectName);
     }
 
-    public void setUp(File inputText, File inputCode, SortedMap<String, String> additionalConfigs, File outputDir) {
-        definePipeline(inputText, inputCode, additionalConfigs);
+    public void setUp(File inputText, File inputCode, SortedMap<String, String> additionalConfigs, File outputDir, LargeLanguageModel largeLanguageModel) {
+        definePipeline(inputText, inputCode, additionalConfigs, largeLanguageModel);
         setOutputDirectory(outputDir);
         isSetUp = true;
     }
 
-    private void definePipeline(File inputText, File inputCode, SortedMap<String, String> additionalConfigs) {
+    private void definePipeline(File inputText, File inputCode, SortedMap<String, String> additionalConfigs, LargeLanguageModel largeLanguageModel) {
         ArDoCo arDoCo = this.getArDoCo();
         var dataRepository = arDoCo.getDataRepository();
 
@@ -47,7 +48,7 @@ public class ArDoCoForSadSamViaLlmCodeTraceabilityLinkRecovery extends ArDoCoRun
                 codeConfiguration);
         arDoCo.addPipelineStep(arCoTLModelProviderAgent);
 
-        LLMArchitectureProviderAgent llmArchitectureProviderAgent = new LLMArchitectureProviderAgent(dataRepository);
+        LLMArchitectureProviderAgent llmArchitectureProviderAgent = new LLMArchitectureProviderAgent(dataRepository, largeLanguageModel);
         arDoCo.addPipelineStep(llmArchitectureProviderAgent);
 
         arDoCo.addPipelineStep(TextExtraction.get(additionalConfigs, dataRepository));

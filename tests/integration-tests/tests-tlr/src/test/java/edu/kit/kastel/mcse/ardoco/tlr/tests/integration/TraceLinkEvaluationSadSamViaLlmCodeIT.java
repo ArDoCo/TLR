@@ -18,6 +18,7 @@ import edu.kit.kastel.mcse.ardoco.core.api.output.ArDoCoResult;
 import edu.kit.kastel.mcse.ardoco.core.tests.eval.CodeProject;
 import edu.kit.kastel.mcse.ardoco.core.tests.eval.GoldStandardProject;
 import edu.kit.kastel.mcse.ardoco.core.tests.eval.results.EvaluationResults;
+import edu.kit.kastel.mcse.ardoco.tlr.models.informants.LargeLanguageModel;
 import edu.kit.kastel.mcse.ardoco.tlr.tests.integration.tlrhelper.ModelElementSentenceLink;
 
 class TraceLinkEvaluationSadSamViaLlmCodeIT {
@@ -40,7 +41,7 @@ class TraceLinkEvaluationSadSamViaLlmCodeIT {
     @ParameterizedTest(name = "{0}")
     @EnumSource(CodeProject.class)
     void evaluateSadCodeTlrIT(CodeProject project) {
-        var evaluation = new SadSamViaLlmCodeTraceabilityLinkRecoveryEvaluation(true);
+        var evaluation = new SadSamViaLlmCodeTraceabilityLinkRecoveryEvaluation(true, LargeLanguageModel.PHI_3_14B);
         ArDoCoResult results = evaluation.runTraceLinkEvaluation(project);
         Assertions.assertNotNull(results);
     }
