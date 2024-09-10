@@ -10,7 +10,7 @@ public enum LLMArchitecturePrompt {
 
                     %s
                     """,
-            "Now provide a list that only covers the component names. Omit common prefixes and suffixes in the names."),//
+            "Now provide a list that only covers the component names. Omit common prefixes and suffixes in the names."), //
     CODE_ONLY_V1(
             """
                     You get the package names of a software project. Your task is to summarize the packages w.r.t. the architecture of the system. Try to identify possible components.
@@ -19,14 +19,7 @@ public enum LLMArchitecturePrompt {
 
                     %s
                     """,
-            """
-                    You get a summarization and a suggestion of the components of a software project.
-                    Identify the possible component names and list them. Only list the component names. If you don't know what the component is about, omit it.
-
-                    Summarization:
-
-                    %s
-                    """), //
+            "Now provide a list that only covers the component names. Omit common prefixes and suffixes in the names."), //
     AGGREGATION_V1("""
             You get a list of possible component names. Your task is to aggregate the list and remove duplicates.
             Also filter out component names, that are very generic. Do not repeat what you filtered out.

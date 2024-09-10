@@ -35,6 +35,7 @@ class TraceLinkEvaluationSadSamViaLlmCodeIT {
     @BeforeAll
     static void beforeAll() {
         System.setProperty(LOGGING_ARDOCO_CORE, "info");
+        Assumptions.assumeTrue(System.getenv("OPENAI_API_KEY") != null || System.getenv("OLLAMA_HOST") != null);
     }
 
     @AfterAll
@@ -49,8 +50,8 @@ class TraceLinkEvaluationSadSamViaLlmCodeIT {
         if (llm.isGeneric()) {
             Assumptions.abort("Generic LLM is disabled");
         }
-        if (!llm.isOpenAi()) {
-            Assumptions.abort("Local Models are disabled");
+        if (llm.isOpenAi()) {
+            Assumptions.abort("Model is disabled");
         }
 
         logger.info("###############################################");
@@ -69,13 +70,13 @@ class TraceLinkEvaluationSadSamViaLlmCodeIT {
         logger.info("!!!!!!!!! Results !!!!!!!!!!");
         System.out.println(Arrays.stream(CodeProject.values()).map(Enum::name).collect(Collectors.joining(" & ")) + " \\\\");
         for (LargeLanguageModel llm : LargeLanguageModel.values()) {
-            if (llm.isGeneric()) {
+            if (llm.isGeneric() && RESULTS.keySet().stream().noneMatch(k -> k.getTwo() == llm)) {
                 continue;
             }
-            String llmResult = llm.name() + " ";
+            StringBuilder llmResult = new StringBuilder(llm.getHumanReadableName() + " ");
             for (CodeProject project : CodeProject.values()) {
                 if (!RESULTS.containsKey(Tuples.pair(project, llm))) {
-                    llmResult += "&--&--&--";
+                    llmResult.append("&--&--&--");
                     continue;
                 }
                 ArDoCoResult result = RESULTS.get(Tuples.pair(project, llm));
@@ -85,9 +86,9 @@ class TraceLinkEvaluationSadSamViaLlmCodeIT {
                 var goldStandard = project.getSadCodeGoldStandard();
                 goldStandard = TraceabilityLinkRecoveryEvaluation.enrollGoldStandardForCode(goldStandard, result);
                 var evaluationResults = evaluation.calculateEvaluationResults(result, goldStandard);
-                llmResult += String.format("&%.2f&%.2f&%.2f", evaluationResults.precision(), evaluationResults.recall(), evaluationResults.f1());
+                llmResult.append(String.format("&%.2f&%.2f&%.2f", evaluationResults.precision(), evaluationResults.recall(), evaluationResults.f1()));
             }
-            llmResult += "&&&&&&\\\\"; // end of line
+            llmResult.append("&&&&&&\\\\"); // end of line
             System.out.println(llmResult);
         }
     }
