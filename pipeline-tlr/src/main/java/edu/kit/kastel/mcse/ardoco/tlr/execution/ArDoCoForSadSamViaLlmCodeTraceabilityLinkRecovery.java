@@ -13,6 +13,7 @@ import edu.kit.kastel.mcse.ardoco.tlr.codetraceability.SamCodeTraceabilityLinkRe
 import edu.kit.kastel.mcse.ardoco.tlr.connectiongenerator.ConnectionGenerator;
 import edu.kit.kastel.mcse.ardoco.tlr.models.agents.ArCoTLModelProviderAgent;
 import edu.kit.kastel.mcse.ardoco.tlr.models.agents.LLMArchitectureProviderAgent;
+import edu.kit.kastel.mcse.ardoco.tlr.models.informants.LLMArchitecturePrompt;
 import edu.kit.kastel.mcse.ardoco.tlr.models.informants.LargeLanguageModel;
 import edu.kit.kastel.mcse.ardoco.tlr.recommendationgenerator.RecommendationGenerator;
 import edu.kit.kastel.mcse.ardoco.tlr.text.providers.TextPreprocessingAgent;
@@ -24,13 +25,15 @@ public class ArDoCoForSadSamViaLlmCodeTraceabilityLinkRecovery extends ArDoCoRun
         super(projectName);
     }
 
-    public void setUp(File inputText, File inputCode, SortedMap<String, String> additionalConfigs, File outputDir, LargeLanguageModel largeLanguageModel) {
-        definePipeline(inputText, inputCode, additionalConfigs, largeLanguageModel);
+    public void setUp(File inputText, File inputCode, SortedMap<String, String> additionalConfigs, File outputDir, LargeLanguageModel largeLanguageModel,
+            LLMArchitecturePrompt documentationExtractionPrompt, LLMArchitecturePrompt codeExtractionPrompt, LLMArchitecturePrompt aggregationPrompt) {
+        definePipeline(inputText, inputCode, additionalConfigs, largeLanguageModel, documentationExtractionPrompt, codeExtractionPrompt, aggregationPrompt);
         setOutputDirectory(outputDir);
         isSetUp = true;
     }
 
-    private void definePipeline(File inputText, File inputCode, SortedMap<String, String> additionalConfigs, LargeLanguageModel largeLanguageModel) {
+    private void definePipeline(File inputText, File inputCode, SortedMap<String, String> additionalConfigs, LargeLanguageModel largeLanguageModel,
+            LLMArchitecturePrompt documentationExtractionPrompt, LLMArchitecturePrompt codeExtractionPrompt, LLMArchitecturePrompt aggregationPrompt) {
         ArDoCo arDoCo = this.getArDoCo();
         var dataRepository = arDoCo.getDataRepository();
 
@@ -48,7 +51,8 @@ public class ArDoCoForSadSamViaLlmCodeTraceabilityLinkRecovery extends ArDoCoRun
                 codeConfiguration);
         arDoCo.addPipelineStep(arCoTLModelProviderAgent);
 
-        LLMArchitectureProviderAgent llmArchitectureProviderAgent = new LLMArchitectureProviderAgent(dataRepository, largeLanguageModel);
+        LLMArchitectureProviderAgent llmArchitectureProviderAgent = new LLMArchitectureProviderAgent(dataRepository, largeLanguageModel,
+                documentationExtractionPrompt, codeExtractionPrompt, aggregationPrompt);
         arDoCo.addPipelineStep(llmArchitectureProviderAgent);
 
         arDoCo.addPipelineStep(TextExtraction.get(additionalConfigs, dataRepository));

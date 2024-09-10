@@ -20,18 +20,32 @@ import edu.kit.kastel.mcse.ardoco.core.common.util.TraceLinkUtilities;
 import edu.kit.kastel.mcse.ardoco.core.data.DataRepository;
 import edu.kit.kastel.mcse.ardoco.core.execution.runner.ArDoCoRunner;
 import edu.kit.kastel.mcse.ardoco.core.tests.eval.CodeProject;
+import edu.kit.kastel.mcse.ardoco.core.tests.eval.results.EvaluationResults;
 import edu.kit.kastel.mcse.ardoco.core.tests.eval.results.ExpectedResults;
 import edu.kit.kastel.mcse.ardoco.tlr.execution.ArDoCoForSadSamViaLlmCodeTraceabilityLinkRecovery;
+import edu.kit.kastel.mcse.ardoco.tlr.models.informants.LLMArchitecturePrompt;
 import edu.kit.kastel.mcse.ardoco.tlr.models.informants.LargeLanguageModel;
 
 class SadSamViaLlmCodeTraceabilityLinkRecoveryEvaluation extends TraceabilityLinkRecoveryEvaluation<CodeProject> {
     private final boolean acmFile;
     private final LargeLanguageModel largeLanguageModel;
+    private final LLMArchitecturePrompt documentationExtractionPrompt;
+    private final LLMArchitecturePrompt codeExtractionPrompt;
+    private final LLMArchitecturePrompt aggregationPrompt;
 
-    public SadSamViaLlmCodeTraceabilityLinkRecoveryEvaluation(boolean acmFile, LargeLanguageModel largeLanguageModel) {
+    public SadSamViaLlmCodeTraceabilityLinkRecoveryEvaluation(boolean acmFile, LargeLanguageModel largeLanguageModel,
+            LLMArchitecturePrompt documentationExtractionPrompt, LLMArchitecturePrompt codeExtractionPrompt, LLMArchitecturePrompt aggregationPrompt) {
         super();
         this.acmFile = acmFile;
         this.largeLanguageModel = largeLanguageModel;
+        this.documentationExtractionPrompt = documentationExtractionPrompt;
+        this.codeExtractionPrompt = codeExtractionPrompt;
+        this.aggregationPrompt = aggregationPrompt;
+    }
+
+    @Override
+    protected void compareResults(EvaluationResults<String> results, ExpectedResults expectedResults) {
+        // Disable Asserts. We want to see all results.
     }
 
     @Override
@@ -49,7 +63,8 @@ class SadSamViaLlmCodeTraceabilityLinkRecoveryEvaluation extends TraceabilityLin
         File outputDir = new File(OUTPUT);
 
         var runner = new ArDoCoForSadSamViaLlmCodeTraceabilityLinkRecovery(name);
-        runner.setUp(textInput, inputCode, additionalConfigsMap, outputDir, largeLanguageModel);
+        runner.setUp(textInput, inputCode, additionalConfigsMap, outputDir, largeLanguageModel, documentationExtractionPrompt, codeExtractionPrompt,
+                aggregationPrompt);
         return runner;
     }
 

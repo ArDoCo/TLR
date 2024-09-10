@@ -22,7 +22,11 @@ public enum LargeLanguageModel {
     CODELLAMA_13B(() -> createOllamaModel("codellama:13b")), //
     CODELLAMA_70B(() -> createOllamaModel("codellama:70b")), //
     //
+    // DEEPSEEK_CODER_V2_16B(() -> createOllamaModel("deepseek-coder-v2:16b")), //
+    //
     GEMMA_2_27B(() -> createOllamaModel("gemma2:27b")), //
+    //
+    QWEN_2_72B(() -> createOllamaModel("qwen2:72b")), //
     //
     LLAMA_3_1_8B(() -> createOllamaModel("llama3.1:8b-instruct-fp16")), //
     LLAMA_3_1_70B(() -> createOllamaModel("llama3.1:70b")), //
@@ -43,6 +47,14 @@ public enum LargeLanguageModel {
 
     public ChatLanguageModel create() {
         return creator.get();
+    }
+
+    public boolean isGeneric() {
+        return this.name().endsWith("_GENERIC");
+    }
+
+    public boolean isOpenAi() {
+        return this.name().startsWith("GPT_");
     }
 
     private static final int SEED = 422413373;
