@@ -90,7 +90,7 @@ public class LLMArchitectureProviderInformant extends Informant {
             return;
         }
 
-        var packages = codeModel.getAllPackages().stream().filter(it -> it.getContent().size() > 1).toList();
+        var packages = codeModel.getAllPackages().stream().filter(it -> !it.getContent().isEmpty()).toList();
         parseComponentsFromAiRequests(componentNames, codePrompt.getTemplates(), String.join("\n", packages.stream().map(this::getPackageName).toList()));
     }
 
@@ -133,8 +133,8 @@ public class LLMArchitectureProviderInformant extends Informant {
             line = line.trim();
 
             // Version 5: 1. Name (NotImportant) or 2. Name (SomeString)
-            if (line.matches("^\\d+\\.\\s*.*\\s*\\(.*\\)$")) {
-                componentNames.add(line.split("\\.\\s*")[1].split("\\s*\\(.*\\)")[0]);
+            if (line.matches("^\\d+\\.\\s+.+\\s*\\(.*\\)$")) {
+                componentNames.add(line.split("\\.\\s+")[1].split("\\s*\\(.*\\)")[0]);
             }
             // Version 1: 1. **Name** or 2. **Name**
             else if (line.matches("^\\d+\\.\\s*\\*\\*.*\\*\\*$")) {
