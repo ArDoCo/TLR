@@ -47,11 +47,10 @@ class TraceLinkEvaluationSadSamViaLlmCodeIT {
     @ParameterizedTest(name = "{0} ({1})")
     @MethodSource("llmsXprojects")
     void evaluateSadCodeTlrIT(CodeProject project, LargeLanguageModel llm) {
+        Assumptions.assumeTrue(System.getenv("CI") == null);
+
         if (llm.isGeneric()) {
             Assumptions.abort("Generic LLM is disabled");
-        }
-        if (llm.isOpenAi()) {
-            Assumptions.abort("Model is disabled");
         }
 
         logger.info("###############################################");

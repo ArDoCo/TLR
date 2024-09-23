@@ -22,18 +22,18 @@ public enum LargeLanguageModel {
     CODELLAMA_13B("Codellama 13b", () -> createOllamaModel("codellama:13b")), //
     CODELLAMA_70B("Codellama 70b", () -> createOllamaModel("codellama:70b")), //
     //
-    GEMMA_2_27B("Gemma2 27b", () -> createOllamaModel("gemma2:27b")), //
+    // GEMMA_2_27B("Gemma2 27b", () -> createOllamaModel("gemma2:27b")), //
     //
     // QWEN_2_72B("Qwen2 72b", () -> createOllamaModel("qwen2:72b")), //
     //
     LLAMA_3_1_8B("Llama3.1 8b", () -> createOllamaModel("llama3.1:8b-instruct-fp16")), //
     LLAMA_3_1_70B("Llama3.1 70b", () -> createOllamaModel("llama3.1:70b")), //
     //
-    MISTRAL_7B("Mistral 7b", () -> createOllamaModel("mistral:7b")), //
-    MISTRAL_NEMO_27B("Mistral Nemo 12b", () -> createOllamaModel("mistral-nemo:12b")), //
-    MIXTRAL_8_X_22B("Mixtral 8x22b", () -> createOllamaModel("mixtral:8x22b")), //
+    // MISTRAL_7B("Mistral 7b", () -> createOllamaModel("mistral:7b")), //
+    // MISTRAL_NEMO_27B("Mistral Nemo 12b", () -> createOllamaModel("mistral-nemo:12b")), //
+    // MIXTRAL_8_X_22B("Mixtral 8x22b", () -> createOllamaModel("mixtral:8x22b")), //
     //
-    PHI_3_14B("Phi3 14b", () -> createOllamaModel("phi3:14b")), //
+    // PHI_3_14B("Phi3 14b", () -> createOllamaModel("phi3:14b")), //
     //
     OLLAMA_GENERIC(System.getenv("OLLAMA_MODEL_NAME"), () -> createOllamaModel(System.getenv("OLLAMA_MODEL_NAME")));
 

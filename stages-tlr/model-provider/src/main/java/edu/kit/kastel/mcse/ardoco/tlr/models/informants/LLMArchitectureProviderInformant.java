@@ -2,10 +2,12 @@
 package edu.kit.kastel.mcse.ardoco.tlr.models.informants;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ChatMessage;
@@ -19,7 +21,10 @@ import edu.kit.kastel.mcse.ardoco.core.api.models.arcotl.CodeModel;
 import edu.kit.kastel.mcse.ardoco.core.api.models.arcotl.architecture.ArchitectureComponent;
 import edu.kit.kastel.mcse.ardoco.core.api.models.arcotl.architecture.ArchitectureItem;
 import edu.kit.kastel.mcse.ardoco.core.api.models.arcotl.code.CodePackage;
+import edu.kit.kastel.mcse.ardoco.core.common.util.CommonTextToolsConfig;
 import edu.kit.kastel.mcse.ardoco.core.common.util.DataRepositoryHelper;
+import edu.kit.kastel.mcse.ardoco.core.common.util.wordsim.WordSimUtils;
+import edu.kit.kastel.mcse.ardoco.core.common.util.wordsim.measures.levenshtein.LevenshteinMeasure;
 import edu.kit.kastel.mcse.ardoco.core.data.DataRepository;
 import edu.kit.kastel.mcse.ardoco.core.pipeline.agent.Informant;
 
@@ -47,22 +52,30 @@ public class LLMArchitectureProviderInformant extends Informant {
             throw new IllegalArgumentException("At least one prompt must be provided");
         }
         if (documentationPrompt != null && codePrompt != null && aggregationPrompt == null) {
-            throw new IllegalArgumentException("Aggregation prompt must be provided when both documentation and code prompts are provided");
+            logger.info("Using Similarity Metrics to aggregate the component names");
         }
     }
 
     @Override
     protected void process() {
-        List<String> componentNames = new ArrayList<>();
+        List<String> componentNamesDocumentation = new ArrayList<>();
+        List<String> componentNamesCode = new ArrayList<>();
         if (documentationPrompt != null)
-            documentationToArchitecture(componentNames);
+            documentationToArchitecture(componentNamesDocumentation);
         if (codePrompt != null)
-            codeToArchitecture(componentNames);
+            codeToArchitecture(componentNamesCode);
+
+        List<String> componentNames = new ArrayList<>();
 
         if (aggregationPrompt != null) {
-            var aggregation = chatLanguageModel.generate(aggregationPrompt.getTemplates().getFirst().formatted(String.join("\n", componentNames)));
-            componentNames = new ArrayList<>();
+            var allComponentNames = Stream.concat(componentNamesDocumentation.stream(), componentNamesCode.stream()).toList();
+            var aggregation = chatLanguageModel.generate(aggregationPrompt.getTemplates().getFirst().formatted(String.join("\n", allComponentNames)));
             parseComponentNames(aggregation, componentNames);
+        } else if (documentationPrompt != null && codePrompt != null) {
+            componentNames = mergeViaSimilarity(componentNamesDocumentation, componentNamesCode);
+        } else {
+            // If only one prompt is provided, use the component names from that prompt
+            componentNames = Stream.concat(componentNamesDocumentation.stream(), componentNamesCode.stream()).toList();
         }
 
         // Remove any not letter characters
@@ -75,6 +88,19 @@ public class LLMArchitectureProviderInformant extends Informant {
                 .toList();
         logger.info("Component names:\n{}", String.join("\n", componentNames));
         buildModel(componentNames);
+    }
+
+    private static List<String> mergeViaSimilarity(List<String> componentNamesDocumentation, List<String> componentNamesCode) {
+        WordSimUtils simUtils = new WordSimUtils();
+        simUtils.setMeasures(Collections.singletonList(new LevenshteinMeasure(CommonTextToolsConfig.LEVENSHTEIN_MIN_LENGTH,
+                CommonTextToolsConfig.LEVENSHTEIN_MAX_DISTANCE, 0.8)));
+        List<String> componentNames = new ArrayList<>();
+        for (String componentName : Stream.concat(componentNamesDocumentation.stream(), componentNamesCode.stream()).toList()) {
+            if (componentNames.stream().noneMatch(it -> simUtils.areWordsSimilar(it, componentName))) {
+                componentNames.add(componentName);
+            }
+        }
+        return componentNames;
     }
 
     private void documentationToArchitecture(List<String> componentNames) {
