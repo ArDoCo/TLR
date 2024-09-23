@@ -81,7 +81,7 @@ public class LLMArchitectureProviderInformant extends Informant {
         // Remove any not letter characters
         componentNames = componentNames.stream()
                 .map(it -> it.replaceAll("[^a-zA-Z0-9 \\-_]", "").replaceAll("\\s+", " ").trim())
-                .map(it -> it.replace("Component", "").trim())
+                .map(it -> it.replace("Components", "").replace("Component", "").trim())
                 .filter(it -> !it.isBlank())
                 .distinct()
                 .sorted()
