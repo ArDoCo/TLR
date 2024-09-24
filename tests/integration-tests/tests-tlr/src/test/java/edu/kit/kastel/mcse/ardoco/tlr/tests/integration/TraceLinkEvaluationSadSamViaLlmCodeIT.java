@@ -56,7 +56,8 @@ class TraceLinkEvaluationSadSamViaLlmCodeIT {
 
         logger.info("###############################################");
         logger.info("Evaluating project {} with LLM '{}'", project, llm);
-        var evaluation = new SadSamViaLlmCodeTraceabilityLinkRecoveryEvaluation(true, llm, LLMArchitecturePrompt.DOCUMENTATION_ONLY_V1, LLMArchitecturePrompt.CODE_ONLY_V1, LLMArchitecturePrompt.AGGREGATION_V1);
+        var evaluation = new SadSamViaLlmCodeTraceabilityLinkRecoveryEvaluation(true, llm, LLMArchitecturePrompt.DOCUMENTATION_ONLY_V1,
+                LLMArchitecturePrompt.CODE_ONLY_V1, LLMArchitecturePrompt.AGGREGATION_V1);
         var result = evaluation.runTraceLinkEvaluation(project);
         if (result != null) {
             RESULTS.put(Tuples.pair(project, llm), result);
