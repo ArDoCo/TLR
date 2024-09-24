@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -55,7 +56,7 @@ class TraceLinkEvaluationSadSamViaLlmCodeIT {
 
         logger.info("###############################################");
         logger.info("Evaluating project {} with LLM '{}'", project, llm);
-        var evaluation = new SadSamViaLlmCodeTraceabilityLinkRecoveryEvaluation(true, llm, LLMArchitecturePrompt.DOCUMENTATION_ONLY_V1, null, null);
+        var evaluation = new SadSamViaLlmCodeTraceabilityLinkRecoveryEvaluation(true, llm, LLMArchitecturePrompt.DOCUMENTATION_ONLY_V1, LLMArchitecturePrompt.CODE_ONLY_V1, LLMArchitecturePrompt.AGGREGATION_V1);
         var result = evaluation.runTraceLinkEvaluation(project);
         if (result != null) {
             RESULTS.put(Tuples.pair(project, llm), result);
@@ -81,11 +82,12 @@ class TraceLinkEvaluationSadSamViaLlmCodeIT {
                 ArDoCoResult result = RESULTS.get(Tuples.pair(project, llm));
 
                 // Just some instance .. parameters do not matter ..
-                var evaluation = new SadSamViaLlmCodeTraceabilityLinkRecoveryEvaluation(true, llm, LLMArchitecturePrompt.DOCUMENTATION_ONLY_V1, null, null);
+                var evaluation = new SadSamViaLlmCodeTraceabilityLinkRecoveryEvaluation(true, llm, null, LLMArchitecturePrompt.CODE_ONLY_V1, null);
                 var goldStandard = project.getSadCodeGoldStandard();
                 goldStandard = TraceabilityLinkRecoveryEvaluation.enrollGoldStandardForCode(goldStandard, result);
                 var evaluationResults = evaluation.calculateEvaluationResults(result, goldStandard);
-                llmResult.append(String.format("&%.2f&%.2f&%.2f", evaluationResults.precision(), evaluationResults.recall(), evaluationResults.f1()));
+                llmResult.append(String.format(Locale.ENGLISH, "&%.2f&%.2f&%.2f", evaluationResults.precision(), evaluationResults.recall(), evaluationResults
+                        .f1()));
             }
             llmResult.append("&&&&&&\\\\"); // end of line
             System.out.println(llmResult);

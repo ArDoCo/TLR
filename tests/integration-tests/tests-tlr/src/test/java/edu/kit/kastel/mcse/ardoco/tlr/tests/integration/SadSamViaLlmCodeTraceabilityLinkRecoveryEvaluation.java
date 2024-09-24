@@ -4,9 +4,12 @@ package edu.kit.kastel.mcse.ardoco.tlr.tests.integration;
 import static edu.kit.kastel.mcse.ardoco.tlr.tests.integration.TraceLinkEvaluationIT.OUTPUT;
 
 import java.io.File;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import org.eclipse.collections.api.collection.ImmutableCollection;
 import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.list.ImmutableList;
 
@@ -22,6 +25,7 @@ import edu.kit.kastel.mcse.ardoco.core.execution.runner.ArDoCoRunner;
 import edu.kit.kastel.mcse.ardoco.core.tests.eval.CodeProject;
 import edu.kit.kastel.mcse.ardoco.core.tests.eval.results.EvaluationResults;
 import edu.kit.kastel.mcse.ardoco.core.tests.eval.results.ExpectedResults;
+import edu.kit.kastel.mcse.ardoco.metrics.ClassificationMetricsCalculator;
 import edu.kit.kastel.mcse.ardoco.tlr.execution.ArDoCoForSadSamViaLlmCodeTraceabilityLinkRecovery;
 import edu.kit.kastel.mcse.ardoco.tlr.models.informants.LLMArchitecturePrompt;
 import edu.kit.kastel.mcse.ardoco.tlr.models.informants.LargeLanguageModel;
@@ -41,6 +45,20 @@ class SadSamViaLlmCodeTraceabilityLinkRecoveryEvaluation extends TraceabilityLin
         this.documentationExtractionPrompt = documentationExtractionPrompt;
         this.codeExtractionPrompt = codeExtractionPrompt;
         this.aggregationPrompt = aggregationPrompt;
+    }
+
+    @Override
+    protected EvaluationResults<String> calculateEvaluationResults(ArDoCoResult arDoCoResult, ImmutableCollection<String> goldStandard) {
+        // Disable asserts here ..
+        ImmutableList<String> results = createTraceLinkStringList(arDoCoResult);
+
+        Set<String> distinctTraceLinks = new LinkedHashSet<>(results.castToCollection());
+        Set<String> distinctGoldStandard = new LinkedHashSet<>(goldStandard.castToCollection());
+        int confusionMatrixSum = getConfusionMatrixSum(arDoCoResult);
+
+        var calculator = ClassificationMetricsCalculator.getInstance();
+        var classification = calculator.calculateMetrics(distinctTraceLinks, distinctGoldStandard, confusionMatrixSum);
+        return new EvaluationResults<>(classification);
     }
 
     @Override

@@ -6,7 +6,7 @@ import java.util.List;
 public enum LLMArchitecturePrompt {
     DOCUMENTATION_ONLY_V1(
             """
-                    Your task is to identify the high-level components based on a software architecture. In a first step, you shall elaborate on the following documentation:
+                    Your task is to identify the high-level components based on a software architecture documentation. In a first step, you shall elaborate on the following documentation:
 
                     %s
                     """,
@@ -22,7 +22,7 @@ public enum LLMArchitecturePrompt {
             "Now provide a list that only covers the component names. Omit common prefixes and suffixes in the names."), //
     AGGREGATION_V1("""
             You get a list of possible component names. Your task is to aggregate the list and remove duplicates.
-            Also filter out component names that are very generic. Do not repeat what you filtered out.
+            Also filter out component names that are very generic. Do not repeat what you filtered out. Only provide the final list.
 
             Possible component names:
 

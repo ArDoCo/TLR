@@ -70,6 +70,7 @@ public class LLMArchitectureProviderInformant extends Informant {
         if (aggregationPrompt != null) {
             var allComponentNames = Stream.concat(componentNamesDocumentation.stream(), componentNamesCode.stream()).toList();
             var aggregation = chatLanguageModel.generate(aggregationPrompt.getTemplates().getFirst().formatted(String.join("\n", allComponentNames)));
+            logger.info("Response (Aggregation): {}", aggregation);
             parseComponentNames(aggregation, componentNames);
         } else if (documentationPrompt != null && codePrompt != null) {
             componentNames = mergeViaSimilarity(componentNamesDocumentation, componentNamesCode);
@@ -167,16 +168,16 @@ public class LLMArchitectureProviderInformant extends Informant {
                 componentNames.add(line.split("\\*\\*")[1]);
             }
             // Version 2: 1. Name or 2. Name
-            else if (line.matches("^\\d+\\.\\s*.*$")) {
-                componentNames.add(line.split("\\.\\s*")[1]);
+            else if (line.matches("^\\d+\\.\\s+.*$")) {
+                componentNames.add(line.split("\\d+\\.\\s+")[1]);
             }
             // Version 3: - **Name**
-            else if (line.matches("^([-*])\\s*\\*\\*.*\\*\\*$")) {
+            else if (line.matches("^([-*])\\s+\\*\\*.*\\*\\*$")) {
                 componentNames.add(line.split("\\*\\*")[1]);
             }
             // Version 4: - Name
-            else if (line.matches("^([-*])\\s*.*$")) {
-                componentNames.add(line.split("([-*])\\s*")[1]);
+            else if (line.matches("^([-*])\\s+.*$")) {
+                componentNames.add(line.split("([-*])\\s+")[1]);
             } else {
                 logger.warn("Could not parse line: {}", line);
             }

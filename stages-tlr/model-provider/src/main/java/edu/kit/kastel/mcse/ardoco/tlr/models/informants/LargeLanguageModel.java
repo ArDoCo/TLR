@@ -50,7 +50,7 @@ public enum LargeLanguageModel {
     }
 
     public ChatLanguageModel create() {
-        return creator.get();
+        return new CachedChatLanguageModel(creator.get(), this.name());
     }
 
     public boolean isGeneric() {
