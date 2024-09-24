@@ -22,7 +22,7 @@ public enum LLMArchitecturePrompt {
             "Now provide a list that only covers the component names. Omit common prefixes and suffixes in the names."), //
     AGGREGATION_V1("""
             You get a list of possible component names. Your task is to aggregate the list and remove duplicates.
-            Also filter out component names that are very generic. Do not repeat what you filtered out. Only provide the final list.
+            Also filter out component names that are very generic. Do not repeat what you filtered out. Only provide the final enumeration.
 
             Possible component names:
 
