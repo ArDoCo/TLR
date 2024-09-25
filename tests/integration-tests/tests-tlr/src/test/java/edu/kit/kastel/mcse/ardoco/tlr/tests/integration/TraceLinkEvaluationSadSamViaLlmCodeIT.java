@@ -53,14 +53,15 @@ class TraceLinkEvaluationSadSamViaLlmCodeIT {
     void evaluateSadCodeTlrIT(CodeProject project, LargeLanguageModel llm) {
         Assumptions.assumeTrue(System.getenv("CI") == null);
 
-        if (llm.isGeneric()) {
-            Assumptions.abort("Generic LLM is disabled");
-        }
+        LLMArchitecturePrompt docPrompt = LLMArchitecturePrompt.DOCUMENTATION_ONLY_V1;
+        LLMArchitecturePrompt codePrompt = null;
+        LLMArchitecturePrompt aggPrompt = null;
 
         logger.info("###############################################");
         logger.info("Evaluating project {} with LLM '{}'", project, llm);
-        var evaluation = new SadSamViaLlmCodeTraceabilityLinkRecoveryEvaluation(true, llm, LLMArchitecturePrompt.DOCUMENTATION_ONLY_V1,
-                LLMArchitecturePrompt.CODE_ONLY_V1, LLMArchitecturePrompt.AGGREGATION_V1);
+        logger.info("Prompts: {}, {}, {}", docPrompt, codePrompt, aggPrompt);
+
+        var evaluation = new SadSamViaLlmCodeTraceabilityLinkRecoveryEvaluation(true, llm, docPrompt, codePrompt, aggPrompt);
         var result = evaluation.runTraceLinkEvaluation(project);
         if (result != null) {
             RESULTS.put(Tuples.pair(project, llm), result);
@@ -72,7 +73,9 @@ class TraceLinkEvaluationSadSamViaLlmCodeIT {
     @AfterAll
     static void printResults() {
         logger.info("!!!!!!!!! Results !!!!!!!!!!");
-        System.out.println(Arrays.stream(CodeProject.values()).map(Enum::name).collect(Collectors.joining(" & ")) + " Macro Avg & Weighted Average" + " \\\\");
+        System.out.println(Arrays.stream(CodeProject.values())
+                .map(Enum::name)
+                .collect(Collectors.joining(" & ")) + " & Macro Avg & Weighted Average" + " \\\\");
         for (LargeLanguageModel llm : LargeLanguageModel.values()) {
             if (llm.isGeneric() && RESULTS.keySet().stream().noneMatch(k -> k.getTwo() == llm)) {
                 continue;
@@ -111,6 +114,8 @@ class TraceLinkEvaluationSadSamViaLlmCodeIT {
     private static Stream<Arguments> llmsXprojects() {
         List<Arguments> result = new ArrayList<>();
         for (LargeLanguageModel llm : LargeLanguageModel.values()) {
+            if (llm.isGeneric())
+                continue;
             for (CodeProject codeProject : CodeProject.values()) {
                 result.add(Arguments.of(codeProject, llm));
             }
