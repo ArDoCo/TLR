@@ -179,8 +179,8 @@ public class LLMArchitectureProviderInformant extends Informant {
             else if (line.matches("^([-*])\\s+.*$")) {
                 componentNames.add(line.split("([-*])\\s+")[1]);
             }
-            // Version 5: Name, Name2, Name3,
-            else if (line.matches("(.*,\\s+)+.*")) {
+            // Version 5: Name, Name2, Name3, (at least 4 names .. otherwise we match to many things)
+            else if (line.matches("(.*,\\s+){3,}.*")) {
                 componentNames.addAll(List.of(line.split(",\\s+")));
             } else {
                 logger.warn("Could not parse line: {}", line);
