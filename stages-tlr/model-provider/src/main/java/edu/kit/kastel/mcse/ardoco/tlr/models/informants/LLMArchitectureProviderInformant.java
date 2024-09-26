@@ -91,14 +91,16 @@ public class LLMArchitectureProviderInformant extends Informant {
         buildModel(componentNames);
     }
 
-    private static List<String> mergeViaSimilarity(List<String> componentNamesDocumentation, List<String> componentNamesCode) {
+    private List<String> mergeViaSimilarity(List<String> componentNamesDocumentation, List<String> componentNamesCode) {
         WordSimUtils simUtils = new WordSimUtils();
         simUtils.setMeasures(Collections.singletonList(new LevenshteinMeasure(CommonTextToolsConfig.LEVENSHTEIN_MIN_LENGTH,
-                CommonTextToolsConfig.LEVENSHTEIN_MAX_DISTANCE, 0.8)));
+                CommonTextToolsConfig.LEVENSHTEIN_MAX_DISTANCE, 0.5)));
         List<String> componentNames = new ArrayList<>();
         for (String componentName : Stream.concat(componentNamesDocumentation.stream(), componentNamesCode.stream()).toList()) {
             if (componentNames.stream().noneMatch(it -> simUtils.areWordsSimilar(it, componentName))) {
                 componentNames.add(componentName);
+            } else {
+                logger.info("Similar component name found (skipping): {}", componentName);
             }
         }
         return componentNames;
