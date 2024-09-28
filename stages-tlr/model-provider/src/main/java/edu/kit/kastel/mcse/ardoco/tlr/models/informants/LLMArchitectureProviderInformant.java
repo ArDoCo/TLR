@@ -81,9 +81,8 @@ public class LLMArchitectureProviderInformant extends Informant {
 
         // Remove any not letter characters
         componentNames = componentNames.stream()
-                .map(it -> it.replaceAll("[^a-zA-Z0-9 \\-_]", "").replaceAll("\\s+", " ").trim())
+                // .map(it -> it.replaceAll("[^a-zA-Z0-9 \\-_]", "").replaceAll("\\s+", " ").trim())
                 .map(it -> it.replace("Components", "").replace("Component", "").trim())
-                .map(it -> it.replace(" ", ""))
                 .filter(it -> !it.isBlank())
                 .distinct()
                 .sorted()
@@ -162,31 +161,19 @@ public class LLMArchitectureProviderInformant extends Informant {
             }
             line = line.trim();
 
-            // Version 5: 1. Name (NotImportant) or 2. Name (SomeString)
-            if (line.matches("^\\d+\\.\\s+.+\\s*\\(.*\\)$")) {
-                componentNames.add(line.split("\\.\\s+")[1].split("\\s*\\(.*\\)")[0]);
-            }
-            // Version 1: 1. **Name** or 2. **Name**
-            else if (line.matches("^\\d+\\.\\s*\\*\\*.*\\*\\*$")) {
-                componentNames.add(line.split("\\*\\*")[1]);
-            }
-            // Version 2: 1. Name or 2. Name
-            else if (line.matches("^\\d+\\.\\s+.*$")) {
-                componentNames.add(line.split("\\d+\\.\\s+")[1]);
-            }
-            // Version 3: - **Name**
-            else if (line.matches("^([-*])\\s+\\*\\*.*\\*\\*$")) {
-                componentNames.add(line.split("\\*\\*")[1]);
-            }
-            // Version 4: - Name
-            else if (line.matches("^([-*])\\s+.*$")) {
-                componentNames.add(line.split("([-*])\\s+")[1]);
-            }
-            // Version 5: Name, Name2, Name3, (at least 4 names .. otherwise we match to many things)
-            else if (line.matches("(.*,\\s+){3,}.*")) {
-                componentNames.addAll(List.of(line.split(",\\s+")));
-            } else {
-                logger.warn("Could not parse line: {}", line);
+            if (line.startsWith("-")) {
+                // Defined Format "- Name1"
+                var name = line.substring(1).trim();
+                componentNames.add(name);
+            } /* else if (Character.isDigit(line.charAt(0)) && line.contains(".")) {
+                // Fallback Format: 1. Name
+                var name = line.split("\\.", 2)[1].trim();
+                // We defined camel case ... so all after the space might be additional information
+                if (name.contains(" "))
+                    name = name.split(" ", 2)[0].trim();
+                componentNames.add(name);
+              }*/ else {
+                logger.warn("Could not parse component name: {}", line);
             }
         }
     }

@@ -69,7 +69,13 @@ public enum LargeLanguageModel {
         if (apiKey == null || orgId == null) {
             throw new IllegalArgumentException("OPENAI_API_KEY and OPENAI_ORG_ID must be set as environment variables");
         }
-        return new OpenAiChatModel.OpenAiChatModelBuilder().modelName(model).apiKey(apiKey).organizationId(orgId).seed(SEED).temperature(0.0).build();
+        return new OpenAiChatModel.OpenAiChatModelBuilder().modelName(model)
+                .apiKey(apiKey)
+                .organizationId(orgId)
+                .seed(SEED)
+                .temperature(0.0)
+                .timeout(Duration.ofMinutes(10))
+                .build();
     }
 
     private static ChatLanguageModel createOllamaModel(String model) {
