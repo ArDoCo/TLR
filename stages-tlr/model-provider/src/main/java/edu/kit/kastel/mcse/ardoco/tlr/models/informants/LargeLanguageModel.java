@@ -20,7 +20,7 @@ public enum LargeLanguageModel {
     OPENAI_GENERIC(System.getenv("OPENAI_MODEL_NAME"), () -> createOpenAiModel(System.getenv("OPENAI_MODEL_NAME"))), //
     // OLLAMA
     CODELLAMA_13B("Codellama 13b", () -> createOllamaModel("codellama:13b")), //
-    CODELLAMA_70B("Codellama 70b", () -> createOllamaModel("codellama:70b")), //
+    // CODELLAMA_70B("Codellama 70b", () -> createOllamaModel("codellama:70b")), //
     //
     // GEMMA_2_27B("Gemma2 27b", () -> createOllamaModel("gemma2:27b")), //
     //
