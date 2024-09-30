@@ -1,6 +1,9 @@
 /* Licensed under MIT 2024. */
 package edu.kit.kastel.mcse.ardoco.tlr.models.informants;
 
+import static edu.kit.kastel.mcse.ardoco.tlr.models.informants.LLMArchitecturePrompt.Features.PACKAGES;
+import static edu.kit.kastel.mcse.ardoco.tlr.models.informants.LLMArchitecturePrompt.Features.PACKAGES_AND_THEIR_CLASSES;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -15,6 +18,7 @@ import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import edu.kit.kastel.mcse.ardoco.core.api.models.ArchitectureModelType;
 import edu.kit.kastel.mcse.ardoco.core.api.models.CodeModelType;
+import edu.kit.kastel.mcse.ardoco.core.api.models.Entity;
 import edu.kit.kastel.mcse.ardoco.core.api.models.ModelStates;
 import edu.kit.kastel.mcse.ardoco.core.api.models.arcotl.ArchitectureModel;
 import edu.kit.kastel.mcse.ardoco.core.api.models.arcotl.CodeModel;
@@ -35,9 +39,10 @@ public class LLMArchitectureProviderInformant extends Informant {
     private final LLMArchitecturePrompt documentationPrompt;
     private final LLMArchitecturePrompt codePrompt;
     private final LLMArchitecturePrompt aggregationPrompt;
+    private final LLMArchitecturePrompt.Features codeFeature;
 
     public LLMArchitectureProviderInformant(DataRepository dataRepository, LargeLanguageModel largeLanguageModel, LLMArchitecturePrompt documentation,
-            LLMArchitecturePrompt code, LLMArchitecturePrompt aggregation) {
+            LLMArchitecturePrompt code, LLMArchitecturePrompt.Features codeFeature, LLMArchitecturePrompt aggregation) {
         super(LLMArchitectureProviderInformant.class.getSimpleName(), dataRepository);
         String apiKey = System.getenv("OPENAI_API_KEY");
         String orgId = System.getenv("OPENAI_ORG_ID");
@@ -47,12 +52,16 @@ public class LLMArchitectureProviderInformant extends Informant {
         this.chatLanguageModel = largeLanguageModel.create();
         this.documentationPrompt = documentation;
         this.codePrompt = code;
+        this.codeFeature = codeFeature;
         this.aggregationPrompt = aggregation;
         if (documentationPrompt == null && codePrompt == null) {
             throw new IllegalArgumentException("At least one prompt must be provided");
         }
         if (documentationPrompt != null && codePrompt != null && aggregationPrompt == null) {
             logger.info("Using Similarity Metrics to aggregate the component names");
+        }
+        if (codePrompt != null && codeFeature == null) {
+            throw new IllegalArgumentException("Code prompt requires a code feature");
         }
     }
 
@@ -121,8 +130,26 @@ public class LLMArchitectureProviderInformant extends Informant {
             return;
         }
 
-        var packages = codeModel.getAllPackages().stream().filter(it -> !it.getContent().isEmpty()).toList();
-        parseComponentsFromAiRequests(componentNames, codePrompt.getTemplates(), String.join("\n", packages.stream().map(this::getPackageName).toList()));
+        switch (this.codeFeature) {
+        case PACKAGES -> {
+            var packages = codeModel.getAllPackages().stream().filter(it -> !it.getContent().isEmpty()).toList();
+            parseComponentsFromAiRequests(componentNames, codePrompt.getTemplates(PACKAGES), String.join("\n", packages.stream()
+                    .map(this::getPackageName)
+                    .toList()));
+        }
+        case PACKAGES_AND_THEIR_CLASSES -> {
+            var packages = codeModel.getAllPackages().stream().filter(it -> !it.getContent().isEmpty()).toList();
+
+            var packagesWithClasses = packages.stream().map(p -> {
+                var packageName = getPackageName(p);
+                var classes = p.getContent().stream().flatMap(it -> it.getAllCompilationUnits().stream()).map(Entity::getName).distinct().sorted().toList();
+                return packageName + " (" + String.join(", ", classes) + ")";
+            }).toList();
+
+            parseComponentsFromAiRequests(componentNames, codePrompt.getTemplates(PACKAGES_AND_THEIR_CLASSES), String.join("\n", packagesWithClasses));
+        }
+        }
+
     }
 
     private void parseComponentsFromAiRequests(List<String> componentNames, List<String> templates, String dataForFirstPrompt) {

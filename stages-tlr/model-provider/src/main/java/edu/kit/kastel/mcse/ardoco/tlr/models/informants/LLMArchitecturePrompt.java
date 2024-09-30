@@ -18,9 +18,9 @@ public enum LLMArchitecturePrompt {
                     """), //
     CODE_ONLY_V1(
             """
-                    You get the Packages of a software project. Your task is to summarize the Packages w.r.t. the high-level architecture of the system. Try to identify possible components.
+                    You get the {FEATURES} of a software project. Your task is to summarize the {FEATURES} w.r.t. the high-level architecture of the system. Try to identify possible components.
 
-                    Packages:
+                    {FEATURES}:
 
                     %s
                     """,
@@ -49,6 +49,21 @@ public enum LLMArchitecturePrompt {
     }
 
     public List<String> getTemplates() {
+        if (this == CODE_ONLY_V1)
+            throw new IllegalArgumentException("This method is not supported for this enum value");
         return templates;
+    }
+
+    public List<String> getTemplates(Features features) {
+        return templates.stream().map(it -> it.replace("{FEATURES}", features.toString())).toList();
+    }
+
+    public enum Features {
+        PACKAGES, PACKAGES_AND_THEIR_CLASSES;
+
+        @Override
+        public String toString() {
+            return super.toString().charAt(0) + super.toString().toLowerCase().substring(1).replace("_", " ");
+        }
     }
 }

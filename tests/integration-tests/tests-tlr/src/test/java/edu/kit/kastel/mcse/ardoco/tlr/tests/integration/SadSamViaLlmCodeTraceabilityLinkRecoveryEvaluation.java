@@ -36,14 +36,17 @@ class SadSamViaLlmCodeTraceabilityLinkRecoveryEvaluation extends TraceabilityLin
     private final LLMArchitecturePrompt documentationExtractionPrompt;
     private final LLMArchitecturePrompt codeExtractionPrompt;
     private final LLMArchitecturePrompt aggregationPrompt;
+    private final LLMArchitecturePrompt.Features codeFeatures;
 
     public SadSamViaLlmCodeTraceabilityLinkRecoveryEvaluation(boolean acmFile, LargeLanguageModel largeLanguageModel,
-            LLMArchitecturePrompt documentationExtractionPrompt, LLMArchitecturePrompt codeExtractionPrompt, LLMArchitecturePrompt aggregationPrompt) {
+            LLMArchitecturePrompt documentationExtractionPrompt, LLMArchitecturePrompt codeExtractionPrompt, LLMArchitecturePrompt.Features codeFeatures,
+            LLMArchitecturePrompt aggregationPrompt) {
         super();
         this.acmFile = acmFile;
         this.largeLanguageModel = largeLanguageModel;
         this.documentationExtractionPrompt = documentationExtractionPrompt;
         this.codeExtractionPrompt = codeExtractionPrompt;
+        this.codeFeatures = codeFeatures;
         this.aggregationPrompt = aggregationPrompt;
     }
 
@@ -82,7 +85,7 @@ class SadSamViaLlmCodeTraceabilityLinkRecoveryEvaluation extends TraceabilityLin
 
         var runner = new ArDoCoForSadSamViaLlmCodeTraceabilityLinkRecovery(name);
         runner.setUp(textInput, inputCode, additionalConfigsMap, outputDir, largeLanguageModel, documentationExtractionPrompt, codeExtractionPrompt,
-                aggregationPrompt);
+                codeFeatures, aggregationPrompt);
         return runner;
     }
 

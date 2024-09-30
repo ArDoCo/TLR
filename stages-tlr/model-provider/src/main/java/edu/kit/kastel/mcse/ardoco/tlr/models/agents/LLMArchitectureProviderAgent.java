@@ -12,8 +12,9 @@ import edu.kit.kastel.mcse.ardoco.tlr.models.informants.LargeLanguageModel;
 public class LLMArchitectureProviderAgent extends PipelineAgent {
 
     public LLMArchitectureProviderAgent(DataRepository dataRepository, LargeLanguageModel largeLanguageModel,
-            LLMArchitecturePrompt documentationExtractionPrompt, LLMArchitecturePrompt codeExtractionPrompt, LLMArchitecturePrompt aggregationPrompt) {
+            LLMArchitecturePrompt documentationExtractionPrompt, LLMArchitecturePrompt codeExtractionPrompt, LLMArchitecturePrompt.Features codeFeatures,
+            LLMArchitecturePrompt aggregationPrompt) {
         super(List.of(new LLMArchitectureProviderInformant(dataRepository, largeLanguageModel, documentationExtractionPrompt, codeExtractionPrompt,
-                aggregationPrompt)), LLMArchitectureProviderAgent.class.getSimpleName(), dataRepository);
+                codeFeatures, aggregationPrompt)), LLMArchitectureProviderAgent.class.getSimpleName(), dataRepository);
     }
 }

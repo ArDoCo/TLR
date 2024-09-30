@@ -26,14 +26,17 @@ public class ArDoCoForSadSamViaLlmCodeTraceabilityLinkRecovery extends ArDoCoRun
     }
 
     public void setUp(File inputText, File inputCode, SortedMap<String, String> additionalConfigs, File outputDir, LargeLanguageModel largeLanguageModel,
-            LLMArchitecturePrompt documentationExtractionPrompt, LLMArchitecturePrompt codeExtractionPrompt, LLMArchitecturePrompt aggregationPrompt) {
-        definePipeline(inputText, inputCode, additionalConfigs, largeLanguageModel, documentationExtractionPrompt, codeExtractionPrompt, aggregationPrompt);
+            LLMArchitecturePrompt documentationExtractionPrompt, LLMArchitecturePrompt codeExtractionPrompt, LLMArchitecturePrompt.Features codeFeatures,
+            LLMArchitecturePrompt aggregationPrompt) {
+        definePipeline(inputText, inputCode, additionalConfigs, largeLanguageModel, documentationExtractionPrompt, codeExtractionPrompt, codeFeatures,
+                aggregationPrompt);
         setOutputDirectory(outputDir);
         isSetUp = true;
     }
 
     private void definePipeline(File inputText, File inputCode, SortedMap<String, String> additionalConfigs, LargeLanguageModel largeLanguageModel,
-            LLMArchitecturePrompt documentationExtractionPrompt, LLMArchitecturePrompt codeExtractionPrompt, LLMArchitecturePrompt aggregationPrompt) {
+            LLMArchitecturePrompt documentationExtractionPrompt, LLMArchitecturePrompt codeExtractionPrompt, LLMArchitecturePrompt.Features codeFeatures,
+            LLMArchitecturePrompt aggregationPrompt) {
         ArDoCo arDoCo = this.getArDoCo();
         var dataRepository = arDoCo.getDataRepository();
 
@@ -52,7 +55,7 @@ public class ArDoCoForSadSamViaLlmCodeTraceabilityLinkRecovery extends ArDoCoRun
         arDoCo.addPipelineStep(arCoTLModelProviderAgent);
 
         LLMArchitectureProviderAgent llmArchitectureProviderAgent = new LLMArchitectureProviderAgent(dataRepository, largeLanguageModel,
-                documentationExtractionPrompt, codeExtractionPrompt, aggregationPrompt);
+                documentationExtractionPrompt, codeExtractionPrompt, codeFeatures, aggregationPrompt);
         arDoCo.addPipelineStep(llmArchitectureProviderAgent);
 
         arDoCo.addPipelineStep(TextExtraction.get(additionalConfigs, dataRepository));
